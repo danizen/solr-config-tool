@@ -72,7 +72,7 @@ public class CLI {
     
     if (cmd.hasOption("use")) {
       try {
-        config.setMethod(cmd.getOptionValue("use"));
+        config.setTestMethod(cmd.getOptionValue("use"));
       } catch (IllegalArgumentException e) {
         System.err.println("unsupported value for option: use must be set to cloud or embedded");
         System.err.println();
@@ -92,7 +92,7 @@ public class CLI {
       config.setZkRoot(cmd.getOptionValue("zkroot"));     
     }
     
-    if (config.getMethod() == SolrConfig.Method.CLOUD && config.getZkHost() == null) {
+    if (config.getTestMethod() == TestMethod.CLOUD && config.getZkHost() == null) {
       System.err.println("When using cloud verification, zkhost is required");
       System.err.println();
       return false;

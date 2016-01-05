@@ -20,26 +20,28 @@ public class SolrConfig {
     return instance;
   }
   
-  // There is an internal method that specifies the valid methods for the test 
-  public enum Method { CLOUD, EMBEDDED };
+  // mostly for testing in a single JVM
+  public static void newInstance() {
+    instance = new SolrConfig();
+  }
   
   // the attributes are more like a struct than a POJO
-  private Method method = Method.EMBEDDED;
+  private TestMethod method = TestMethod.EMBEDDED;
   private Path path = Paths.get(".");
   private String zkhost = null;
   private String zkroot = null;
   private Path xmloutpath = null;
   
-  public Method getMethod() {
+  public TestMethod getTestMethod() {
     return method;
   }
 
-  public void setMethod(Method method) {
+  public void setTestMethod(TestMethod method) {
     this.method = method;
   }
   
-  public void setMethod(String method) {
-    this.method = SolrConfig.Method.valueOf(method.toUpperCase());
+  public void setTestMethod(String method) {
+    this.method = TestMethod.valueOf(method.toUpperCase());
   }
 
   public Path getPath() {
@@ -96,7 +98,7 @@ public class SolrConfig {
     }
     String v = null;
     if ((v = p.getProperty("method")) != null)
-      this.method = SolrConfig.Method.valueOf(v.toUpperCase());
+      this.method = TestMethod.valueOf(v.toUpperCase());
     if ((v = p.getProperty("zkhost")) != null)
       this.zkhost = v;
     if ((v = p.getProperty("zkroot")) != null)
