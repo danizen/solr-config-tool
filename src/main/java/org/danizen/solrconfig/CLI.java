@@ -1,9 +1,6 @@
 package org.danizen.solrconfig;
 
-import org.danizen.solrconfig.tests.*;
-
 import java.nio.file.Paths;
-
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
@@ -11,9 +8,11 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+
+import org.danizen.solrconfig.tests.*;
+
 
 public class CLI {
   
@@ -56,7 +55,9 @@ public class CLI {
         ConfigDirExists.class,
         SchemaExists.class,
         SolrConfigExists.class,
-        XmlFilesAreValid.class);
+        XmlFilesAreValid.class,
+        // Tests tests assume SolrCloud
+        CanUpConfig.class);
     return result.wasSuccessful();
   }
 

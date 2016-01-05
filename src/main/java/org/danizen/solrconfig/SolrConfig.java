@@ -1,7 +1,13 @@
 package org.danizen.solrconfig;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +45,9 @@ public class SolrConfig {
   private String zkroot = null;
   private Path xmloutpath = null;
   
+  private boolean initClient = true;
+  private SolrClient client = null;
+  
   public TestMethod getTestMethod() {
     return method;
   }
@@ -54,7 +63,7 @@ public class SolrConfig {
   public Path getPath() {
     return path;
   }
-
+  
   public void setPath(Path path) {
     this.path = path;
   }
@@ -66,7 +75,7 @@ public class SolrConfig {
   public String getZkHost() {
     return zkhost;
   }
-
+  
   public void setZkHost(String zkhost) {
     this.zkhost = zkhost;
   }
@@ -94,7 +103,20 @@ public class SolrConfig {
   public Path getSchemaPath() {
     return path.resolve("schema.xml");
   }
-
+  
+  public SolrClient getSolrClient() {
+    if (this.initClient) {
+      this.initClient = false;
+      this.client = createSolrClient();
+    }
+    return this.client;
+  }
+  
+  public SolrClient createSolrClient() {
+    List<String> zkHostList = new ArrayList<String>(Arrays.asList(getZkHost().split(", *")));
+    return new CloudSolrClient(zkHostList, getZkRoot());
+  }
+  
   // but it does know how to load defaults from an properties file
   public void loadDefaults(InputStream defaults) throws IOException {
     Properties p = new Properties();

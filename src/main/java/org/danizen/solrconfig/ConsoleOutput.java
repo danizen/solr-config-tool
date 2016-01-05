@@ -35,7 +35,7 @@ public class ConsoleOutput extends RunListener {
   public void testAssumptionFailure(Failure failure) {
     failed = true;
     Description desc = failure.getDescription();
-    System.out.println(String.format("%-60s [FAIL]", desc.getDisplayName()));      
+    System.out.println(String.format("%-60s [SKIP]", desc.getDisplayName()));      
   }
   
   public void testRunFinished(Result result) {

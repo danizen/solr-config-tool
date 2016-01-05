@@ -1,17 +1,14 @@
 package org.danizen.solrconfig.unittest;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 import java.nio.file.Paths;
-
-import org.apache.commons.cli.CommandLine;
+import static org.junit.Assert.*;
+import org.junit.Test;
 import org.apache.commons.cli.ParseException;
+
 import org.danizen.solrconfig.CLI;
 import org.danizen.solrconfig.SolrConfig;
 import org.danizen.solrconfig.TestMethod;
+
 
 public class CLITest {
   
@@ -53,7 +50,6 @@ public class CLITest {
     CLI cli = new CLI();
     boolean isvalid = cli.validateOptions(cli.parseOptions(args));
     assertTrue("validates command-line options", isvalid);
-
     
     SolrConfig config = SolrConfig.getInstance();
     assertEquals(Paths.get("."), config.getPath());
