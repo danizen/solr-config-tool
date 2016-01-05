@@ -1,26 +1,31 @@
 package org.danizen.solrconfig;
 
+import org.danizen.solrconfig.tests.*;
+
+import java.nio.file.Paths;
+
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+
 public class CLI {
   
-  private Config config = new Config();
-  private Options options = createOptions(); 
+  private SolrConfig config;
+  private Options options = createOptions();
+  
+  public CLI() {
+    this.config = SolrConfig.getInstance();
+  }
   
   public static void main(String[] args) {
     CLI cli = new CLI();   
-    cli.config.loadDefaults();
     
     CommandLine cmd = null;
     try {
@@ -42,16 +47,14 @@ public class CLI {
   }
   
   private boolean executeTest() {
-    // TODO Auto-generated method stub
-    System.out.println("Test configuration in "+config.path+" using "+config.method);
-    if (config.method == Config.Method.CLOUD) {
-      System.out.println("SolrCloud zookeeper hosts: \""+config.zkhost+"\"");
-      if (config.zkroot != null) {
-        System.out.println("SolrCloud zookeeper chroot: \""+config.zkroot+"\"");
-      }      
-    }
-    System.err.println("Actual configtest not yet implemented");
-    return false;
+    JUnitCore core = new JUnitCore();
+    core.addListener(new ConsoleOutput());
+    Result result = core.run(
+        ConfigDirExists.class,
+        SchemaExists.class,
+        SolrConfigExists.class,
+        XmlFilesAreValid.class);
+    return result.wasSuccessful();
   }
 
   private boolean validateOptions(CommandLine cmd) {
@@ -64,20 +67,12 @@ public class CLI {
     }
     
     if (cmd.hasOption("config")) {
-      String configpath = cmd.getOptionValue("config");
-      Path path = config.path = Paths.get(configpath);
-      
-      if (!Files.exists(path) || !Files.isDirectory(path)) {
-        System.err.println("invalid option value: config");
-        System.err.println(path+" is not an existing directory");
-        System.err.println();
-        return false;
-      }
+      config.setPath(cmd.getOptionValue("config"));
     }
     
     if (cmd.hasOption("use")) {
       try {
-        config.method = Config.Method.valueOf(cmd.getOptionValue("use").toUpperCase());
+        config.setMethod(cmd.getOptionValue("use"));
       } catch (IllegalArgumentException e) {
         System.err.println("unsupported value for option: use must be set to cloud or embedded");
         System.err.println();
@@ -85,15 +80,19 @@ public class CLI {
       }
     }
     
+    if (cmd.hasOption("xmlout")) {
+      config.setXmlOutPath(Paths.get(cmd.getOptionValue("xmlout")));          
+    }
+    
     if (cmd.hasOption("zkhost")) {
-      config.zkhost = cmd.getOptionValue("zkhost");
+      config.setZkHost(cmd.getOptionValue("zkhost"));
     }
     
     if (cmd.hasOption("zkroot")) {
-      config.zkroot = cmd.getOptionValue("zkroot");     
+      config.setZkRoot(cmd.getOptionValue("zkroot"));     
     }
     
-    if (config.method == Config.Method.CLOUD && config.zkhost == null) {
+    if (config.getMethod() == SolrConfig.Method.CLOUD && config.getZkHost() == null) {
       System.err.println("When using cloud verification, zkhost is required");
       System.err.println();
       return false;
@@ -103,6 +102,7 @@ public class CLI {
   }
 
   private CommandLine parseOptions(String[] args) throws ParseException {
+    config.loadDefaults();
     CommandLineParser parser = new DefaultParser();
     return parser.parse(options, args);
   }
@@ -145,6 +145,14 @@ public class CLI {
         .desc("Zookeeper chroot [no default]")
         .build();
     options.addOption(chroot);
+    
+    Option xmlout = Option.builder()
+        .longOpt("xmlout")
+        .hasArg()
+        .argName("PATH")
+        .desc("Generate JUnit style output XML to PATH")
+        .build();
+    options.addOption(xmlout);
     
     Option help = Option.builder()
         .longOpt("help")
