@@ -1,11 +1,10 @@
 package org.danizen.solrconfig.tests;
 
+import java.nio.file.Files;
+import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.nio.file.Files;
-
 import org.danizen.solrconfig.SolrConfig;
-import org.junit.Test;
 
 
 public class SchemaExists {

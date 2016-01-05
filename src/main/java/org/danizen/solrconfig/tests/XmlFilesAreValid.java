@@ -31,7 +31,7 @@ import org.danizen.solrconfig.SolrConfig;
 
 public class XmlFilesAreValid {
   
-  private Logger logger = LoggerFactory.getLogger(XmlFilesAreValid.class);
+  private static final Logger logger = LoggerFactory.getLogger(XmlFilesAreValid.class); 
   private SolrConfig config = SolrConfig.getInstance();
   private List<Exception> issues = new LinkedList<Exception>();
   
