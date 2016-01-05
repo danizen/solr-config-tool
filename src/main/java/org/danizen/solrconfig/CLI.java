@@ -36,7 +36,10 @@ public class CLI {
       cli.printHelp();
       System.exit(1);
     }
-
+    
+    // load defaults - never done in unit tests of option parser
+    cli.config.loadDefaults();
+    
     if (!cli.validateOptions(cmd)) {
       cli.printHelp();
       System.exit(2);
@@ -57,7 +60,8 @@ public class CLI {
     return result.wasSuccessful();
   }
 
-  private boolean validateOptions(CommandLine cmd) {
+  public boolean validateOptions(CommandLine cmd) {
+
 
     if (cmd.hasOption("help")) {
       this.printHelp();
@@ -65,7 +69,7 @@ public class CLI {
       // NEVER REACHED
       return false;
     }
-    
+
     if (cmd.hasOption("config")) {
       config.setPath(cmd.getOptionValue("config"));
     }
@@ -101,8 +105,7 @@ public class CLI {
     return true;
   }
 
-  private CommandLine parseOptions(String[] args) throws ParseException {
-    config.loadDefaults();
+  public CommandLine parseOptions(String[] args) throws ParseException {
     CommandLineParser parser = new DefaultParser();
     return parser.parse(options, args);
   }
