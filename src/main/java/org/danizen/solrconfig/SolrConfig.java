@@ -2,11 +2,18 @@ package org.danizen.solrconfig;
 
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SolrConfig {
+  
+  private static final Logger logger = LoggerFactory.getLogger(SolrConfig.class);
   
   // constructor is private so no one else can create it
   private SolrConfig() {
@@ -89,13 +96,9 @@ public class SolrConfig {
   }
 
   // but it does know how to load defaults from an properties file
-  public void loadDefaults(Path defaults) {
+  public void loadDefaults(InputStream defaults) throws IOException {
     Properties p = new Properties();
-    try {
-      p.load(Files.newInputStream(defaults));
-    } catch (IOException e) {
-      System.err.println("Invalid format or I/O error reading "+defaults);
-    }
+    p.load(defaults);
     String v = null;
     if ((v = p.getProperty("method")) != null)
       this.method = TestMethod.valueOf(v.toUpperCase());
@@ -110,7 +113,11 @@ public class SolrConfig {
     Path userhome = Paths.get(System.getProperty("user.home"));
     Path defaultConfigFile = userhome.resolve(".solrconfigtest");    
     if (Files.exists(defaultConfigFile)) {
-      this.loadDefaults(defaultConfigFile);
+      try {
+        this.loadDefaults(Files.newInputStream(defaultConfigFile));
+      } catch (IOException e) {
+        logger.error("invalid format or I/O error reading "+defaultConfigFile);
+      }
     }
   }
 }
