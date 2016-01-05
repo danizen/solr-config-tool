@@ -9,9 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.danizen.solrconfig.SolrConfig;
 import org.danizen.solrconfig.tests.*;
 
+
 public class MissingConfigTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(MissingSchemaTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(MissingConfigTest.class);
   
   @BeforeClass
   public static void setUp() {

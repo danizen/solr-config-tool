@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.danizen.solrconfig.SolrConfig;
 import org.danizen.solrconfig.tests.*;
 
+
 public class MissingSchemaTest {
 
   private static final Logger logger = LoggerFactory.getLogger(MissingSchemaTest.class);
