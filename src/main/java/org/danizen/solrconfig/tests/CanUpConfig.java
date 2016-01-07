@@ -18,6 +18,7 @@ import org.apache.solr.common.cloud.ZkStateReader;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import org.danizen.solrconfig.SolrConfig;
+import org.danizen.solrconfig.CleanUpTask;
 import org.danizen.solrconfig.TestMethod;
 
 public class CanUpConfig {
@@ -53,7 +54,8 @@ public class CanUpConfig {
   public void test() throws IOException {
     SolrZkClient zkClient = config.getZkClient();
     ZkConfigManager configManager = new ZkConfigManager(zkClient);
-    String confName = newConfigName(configManager);
+    final String confName = newConfigName(configManager);
+    CleanUpTask.cleanZnode("/configs/"+confName);
     configManager.uploadConfigDir(config.getPath(), confName);
   }
 
