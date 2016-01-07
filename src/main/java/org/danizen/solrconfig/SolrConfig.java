@@ -9,6 +9,9 @@ import java.util.Properties;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 
+import org.apache.solr.common.cloud.OnReconnect;
+import org.apache.solr.common.cloud.SolrZkClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +48,8 @@ public class SolrConfig {
   private String zkroot = null;
   private Path xmloutpath = null;
   
-  private boolean initClient = true;
   private SolrClient client = null;
+  private SolrZkClient zkClient = null;
   
   public TestMethod getTestMethod() {
     return method;
@@ -105,8 +108,7 @@ public class SolrConfig {
   }
   
   public SolrClient getSolrClient() {
-    if (this.initClient) {
-      this.initClient = false;
+    if (this.client == null) {
       this.client = createSolrClient();
     }
     return this.client;
@@ -116,7 +118,24 @@ public class SolrConfig {
     List<String> zkHostList = new ArrayList<String>(Arrays.asList(getZkHost().split(", *")));
     return new CloudSolrClient(zkHostList, getZkRoot());
   }
-  
+
+  public SolrZkClient getZkClient() {
+    if (this.zkClient == null) {
+      this.zkClient = createZkClient();
+    }
+    return this.zkClient;
+  }
+
+  public SolrZkClient createZkClient() {
+    SolrZkClient zkClient = new SolrZkClient(getZkHost(), 30000, 30000,
+      new OnReconnect() {
+        @Override
+        public void command() {}
+      }
+    );
+    return zkClient;
+  }
+
   // but it does know how to load defaults from an properties file
   public void loadDefaults(InputStream defaults) throws IOException {
     Properties p = new Properties();
