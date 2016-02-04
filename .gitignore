@@ -1,3 +1,4 @@
 .settings/
 dependency-reduced-pom.xml
 target/
+cscope.*

@@ -71,6 +71,7 @@ public class CLI {
         XmlFilesAreValid.class,
         // Tests tests assume SolrCloud
         CanUpConfig.class);
+    CleanUpTask.runAll();
     return result.wasSuccessful();
   }
 
