@@ -51,6 +51,19 @@ public class CLI {
   private boolean executeTest() {
     JUnitCore core = new JUnitCore();
     core.addListener(new ConsoleOutput());
+    
+    // TODO:
+    //  - Can use org.apache.solr.util.SimplePostTool to make it work,
+    //  - Benefit is that in guesses the document type...
+    //  - Constraints us to use SolrCloud rather than EmbeddedSolrServer
+    //  - Adds easier support for multiple file tests 
+    //  - How to add indexing pipeline and stuff is less clear - asked online
+    //  - Maybe sub-class SimplePostTool and add that in a protected method
+    //   
+    // TODO:
+    //  - Allow user to add tests classes through some sort of test discovery
+    //  - Again try to make the test discovery rely on JunitCore. 
+    //
     Result result = core.run(
         ConfigDirExists.class,
         SchemaExists.class,
