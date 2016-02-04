@@ -70,7 +70,9 @@ public class CLI {
         SolrConfigExists.class,
         XmlFilesAreValid.class,
         // Tests tests assume SolrCloud
-        CanUpConfig.class);
+        CanUpConfig.class,
+        CanCreateCollection.class
+        );
     CleanUpTask.runAll();
     return result.wasSuccessful();
   }
@@ -139,15 +141,16 @@ public class CLI {
         .desc("Path to configuration directory [required]")
         .build();
     options.addOption(confpath);
+
+    // EmbeddedSolrServer not supported 
+    //Option cloud = Option.builder()
+    //    .longOpt("use")
+    //    .hasArg()
+    //    .argName("cloud|embedded")
+    //    .desc("how to test [default EmbeddedSolrServer]")
+    //    .build();
+    //options.addOption(cloud);
     
-    Option cloud = Option.builder()
-        .longOpt("use")
-        .hasArg()
-        .argName("cloud|embedded")
-        .desc("how to test [default EmbeddedSolrServer]")
-        .build();
-    options.addOption(cloud);
-       
     Option zkhost = Option.builder()
         .longOpt("zkhost")
         .hasArg()

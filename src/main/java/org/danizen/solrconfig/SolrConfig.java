@@ -6,12 +6,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 
 import org.apache.solr.common.cloud.OnReconnect;
 import org.apache.solr.common.cloud.SolrZkClient;
-
+import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +43,13 @@ public class SolrConfig {
   }
   
   // the attributes are more like a struct than a POJO
-  private TestMethod method = TestMethod.EMBEDDED;
+  private TestMethod method = TestMethod.CLOUD;
   private Path path = Paths.get(".");
   private String zkhost = null;
   private String zkroot = null;
   private Path xmloutpath = null;
+  private String configName = null;
+  private String collectionName = null;
   
   private SolrClient client = null;
   private SolrZkClient zkClient = null;
@@ -129,8 +132,7 @@ public class SolrConfig {
   public SolrZkClient createZkClient() {
     SolrZkClient zkClient = new SolrZkClient(getZkHost(), 30000, 30000,
       new OnReconnect() {
-        @Override
-        public void command() {}
+        public void command() { /* DO NOTHING */}
       }
     );
     return zkClient;
@@ -141,8 +143,9 @@ public class SolrConfig {
     Properties p = new Properties();
     p.load(defaults);
     String v = null;
-    if ((v = p.getProperty("method")) != null)
-      this.method = TestMethod.valueOf(v.toUpperCase());
+    // TODO: no support as yet for EmbeddedSolrServer
+    //if ((v = p.getProperty("method")) != null)
+    //   this.method = TestMethod.valueOf(v.toUpperCase());
     if ((v = p.getProperty("zkhost")) != null)
       this.zkhost = v;
     if ((v = p.getProperty("zkroot")) != null)
@@ -161,4 +164,40 @@ public class SolrConfig {
       }
     }
   }
+  
+  private void formatResponseGuts(StringBuffer buf, NamedList<Object> list, int indent) {
+    String spaces = StringUtils.repeat(" ",  indent);
+    for (int i = 0; i < list.size(); i++) {
+      String name = list.getName(i);
+      Object obj = list.getVal(i);
+      if (!(obj instanceof NamedList)) {
+        buf.append(spaces+name+"("+obj.getClass().getName()+") = "+obj.toString()+"\n");
+      } else {
+        buf.append(spaces+name+": \n");
+        formatResponseGuts(buf, (NamedList<Object>)obj, indent+2);
+      }
+    }
+  }
+  
+  public String formatResponse(NamedList<Object> response) {
+    StringBuffer buf = new StringBuffer();
+    formatResponseGuts(buf, response, 0);
+    return buf.toString();
+  }
+
+  public String getConfigName() {
+    return configName;
+  }
+
+  public void setConfigName(String configName) {
+    this.configName = configName;
+  }
+
+  public String getCollectionName() {
+    return collectionName;
+  }
+
+  public void setCollectionName(String collectionName) {
+    this.collectionName = collectionName;
+  }  
 }
