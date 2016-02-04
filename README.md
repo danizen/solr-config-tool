@@ -19,7 +19,10 @@ java -jar solr-config-test.jar --help
 A typical test against a SolrCloud with Zookeeper on http://localhost:2181/ would look like this:
 
 ```bash
-java -jar solr-config-test.jar --use cloud --xmlout solr-config-test.xml --zxhost http://localhost:2181 <path-to-config>
+java -jar solr-config-test.jar \
+    --xmlout solr-config-test.xml \
+    --zkhost http://localhost:2181 \
+    <path-to-config>
 ```
 
 At this point the tool takes the following actions:
@@ -29,6 +32,14 @@ At this point the tool takes the following actions:
 * Connect with the SolrCloud and upconfig to a random configuration name
 * Create a collection with a random name on the SolrCloud
 * Remove both the collection and the configuration
-* Generate a JUnit report for the results
+* Generate a JUnit XML report containing the results
+
+## Configuration
+
+The program reads a properties file in `$HOME/.solrconfigtest` that may define the following variables:
+
+* `zkhost` - same as the `--zkhost` argument
+* `zkroot` - same as the `--zkroot` argument
+* `method` - same as the `--use` argument
 
  
