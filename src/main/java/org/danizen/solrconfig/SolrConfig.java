@@ -9,7 +9,7 @@ import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.cloud.OnReconnect;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.common.util.NamedList;
@@ -51,6 +51,7 @@ public class SolrConfig {
   private String configName = null;
   private String collectionName = null;
   private boolean cleanup = true; 
+  private String solrurl = null;
   
   private SolrClient client = null;
   private SolrZkClient zkClient = null;
@@ -119,8 +120,12 @@ public class SolrConfig {
   }
   
   public SolrClient createSolrClient() {
-    List<String> zkHostList = new ArrayList<String>(Arrays.asList(getZkHost().split(", *")));
-    return new CloudSolrClient(zkHostList, getZkRoot());
+    if (getSolrURL() == null) {
+      List<String> zkHostList = new ArrayList<String>(Arrays.asList(getZkHost().split(", *")));
+      return new CloudSolrClient(zkHostList, getZkRoot());
+    } else {
+      return new HttpSolrClient(getSolrURL());
+    }
   }
 
   public SolrZkClient getZkClient() {
@@ -151,6 +156,8 @@ public class SolrConfig {
       this.zkhost = v;
     if ((v = p.getProperty("zkroot")) != null)
       this.zkroot = v;
+    if ((v = p.getProperty("solrurl")) != null)
+      this.solrurl = v;
   }
   
   // and it knows a canonical path to that
@@ -208,6 +215,14 @@ public class SolrConfig {
 	
   public void setCleanUp(boolean cleanup) {
 	this.cleanup = cleanup;
+  }
+
+  public String getSolrURL() {
+    return solrurl;
+  }
+
+  public void setSolrURL(String solrurl) {
+    this.solrurl = solrurl;
   }
 
 }

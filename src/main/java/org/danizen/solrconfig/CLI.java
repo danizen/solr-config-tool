@@ -44,8 +44,9 @@ public class CLI {
       System.exit(2);
     }   
     if (!cli.executeTest()) {
-      System.exit(3);      
+        System.exit(3);      
     }
+    System.exit(0);
   }
   
   private boolean executeTest() {
@@ -73,7 +74,10 @@ public class CLI {
         CanUpConfig.class,
         CanCreateCollection.class
         );
-    CleanUpTask.runAll();
+    if (config.getCleanUp()) {
+      CleanUpTask.removeCollection();
+      CleanUpTask.removeConfigSet();
+    }
     return result.wasSuccessful();
   }
 
@@ -87,18 +91,20 @@ public class CLI {
       return false;
     }
 
-    if (cmd.hasOption("config")) {
-      config.setPath(cmd.getOptionValue("config"));
+    if (cmd.hasOption("path")) {
+      config.setPath(cmd.getOptionValue("path"));
     }
     
-    if (cmd.hasOption("use")) {
-      try {
-        config.setTestMethod(cmd.getOptionValue("use"));
-      } catch (IllegalArgumentException e) {
-        System.err.println("unsupported value for option: use must be set to cloud or embedded");
-        System.err.println();
-        return false;
-      }
+    if (cmd.hasOption("confname")) {
+      config.setConfigName(cmd.getOptionValue("confname"));
+    }
+    
+    if (cmd.hasOption("collection")) {
+      config.setCollectionName(cmd.getOptionValue("collection"));
+    }
+    
+    if (cmd.hasOption("solrurl")) {      
+      config.setSolrURL(cmd.getOptionValue("solrurl"));
     }
     
     if (cmd.hasOption("xmlout")) {
@@ -139,12 +145,36 @@ public class CLI {
   private static Options createOptions() {
     Options options = new Options();
     Option confpath = Option.builder()
-        .longOpt("config")
+        .longOpt("path")
         .hasArg()
         .argName("PATH")
-        .desc("Path to configuration directory [required]")
+        .desc("Path to local configuration directory [default is .]")
         .build();
     options.addOption(confpath);
+
+    Option confname = Option.builder()
+        .longOpt("confname")
+        .hasArg()
+        .argName("NAME")
+        .desc("Name of the SolrCloud configset [default random string]")
+        .build();
+    options.addOption(confname);
+
+    Option collection = Option.builder()
+        .longOpt("collection")
+        .hasArg()
+        .argName("NAME")
+        .desc("Name of the SolrCloud collection [default random string]")
+        .build();
+    options.addOption(collection);
+    
+    Option solrurl = Option.builder()
+        .longOpt("solrurl")
+        .hasArg()
+        .argName("URL")
+        .desc("specific URL for Solr [default discovers from ZooKeeper]")
+        .build();
+    options.addOption(solrurl);
 
     // EmbeddedSolrServer not supported 
     //Option cloud = Option.builder()

@@ -54,9 +54,11 @@ public class CanUpConfig {
   public void test() throws IOException {
     SolrZkClient zkClient = config.getZkClient();
     ZkConfigManager configManager = new ZkConfigManager(zkClient);
-    String confName = newConfigName(configManager);
-    config.setConfigName(confName);
-    CleanUpTask.addRemoveConfigSet();
+    String confName = config.getConfigName();
+    if (confName == null) {
+      confName = newConfigName(configManager);
+      config.setConfigName(confName);
+    }
     configManager.uploadConfigDir(config.getPath(), confName);
   }
 

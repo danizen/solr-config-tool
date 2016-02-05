@@ -64,9 +64,11 @@ public class CanCreateCollection {
   @Test
   public void test() throws IOException, SolrServerException {
     SolrClient client = config.getSolrClient();
-    final String collectionName = newCollectionName(client);
-    System.out.println("will create new collection "+collectionName);
-    config.setCollectionName(collectionName);
+    String collectionName = config.getCollectionName();
+    if (collectionName == null) {
+        collectionName = newCollectionName(client);
+        config.setCollectionName(collectionName);
+    }
     
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
     request.setConfigName(config.getConfigName());
@@ -76,7 +78,6 @@ public class CanCreateCollection {
     
     CollectionAdminResponse response = new CollectionAdminResponse();
     response.setResponse(client.request(request));
-    CleanUpTask.addRemoveCollection();
     assertTrue(response.isSuccess());
   }
 }
