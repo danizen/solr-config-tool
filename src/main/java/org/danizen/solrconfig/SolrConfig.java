@@ -44,6 +44,7 @@ public class SolrConfig {
   
   // the attributes are more like a struct than a POJO
   private TestMethod method = TestMethod.CLOUD;
+  private boolean reloadCollection = false;
   private Path path = Paths.get(".");
   private String zkhost = null;
   private String zkroot = null;
@@ -223,6 +224,14 @@ public class SolrConfig {
 
   public void setSolrURL(String solrurl) {
     this.solrurl = solrurl;
+  }
+
+  public boolean getReloadCollection() {
+    return reloadCollection;
+  }
+
+  public void setReloadCollection(boolean reloadCollection) {
+    this.reloadCollection = reloadCollection;
   }
 
 }

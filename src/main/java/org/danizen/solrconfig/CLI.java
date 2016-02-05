@@ -72,8 +72,9 @@ public class CLI {
         XmlFilesAreValid.class,
         // Tests tests assume SolrCloud
         CanUpConfig.class,
-        CanCreateCollection.class
-        );
+        CanCreateCollection.class,
+        CanReloadCollection.class
+    );
     if (config.getCleanUp()) {
       CleanUpTask.removeCollection();
       CleanUpTask.removeConfigSet();
@@ -91,8 +92,8 @@ public class CLI {
       return false;
     }
 
-    if (cmd.hasOption("path")) {
-      config.setPath(cmd.getOptionValue("path"));
+    if (cmd.hasOption("confdir")) {
+      config.setPath(cmd.getOptionValue("confdir"));
     }
     
     if (cmd.hasOption("confname")) {
@@ -123,8 +124,17 @@ public class CLI {
       config.setCleanUp(false);
     }
     
+    if (cmd.hasOption("reload")) {
+      if (!cmd.hasOption("collection")) {
+        System.err.println("When only reloading the collection, --collection is required");
+        System.err.println();
+        return false;
+      }
+      config.setReloadCollection(true);
+    }
+    
     if (config.getTestMethod() == TestMethod.CLOUD && config.getZkHost() == null) {
-      System.err.println("When using cloud verification, zkhost is required");
+      System.err.println("--zkhost is required unless provided by $HOME/.solrconfigtest");
       System.err.println();
       return false;
     }
@@ -139,24 +149,47 @@ public class CLI {
 
   private void printHelp() {
     HelpFormatter helper = new HelpFormatter();
-    helper.printHelp("solr-config-test", options);   
+    helper.printHelp("solr-config-test", options);
+    String[] moreHelp = {
+        "",
+        "$HOME/.solrconfigtest properties:",
+        "    solrurl=<value> - see --solrurl above",
+        "    zkhost=<value> - see --zkhost above",
+        "    zkroot=<value> - see --zkroot above",
+        "",
+        "To test config set in current directory against localhost:",
+        "",
+        "    solr-config-test --zkhost 127.0.0.1:9983",
+        "",
+        "To deploy config set and reload collection:",
+        "",
+        "    solr-config-test --zkhost zoo.example.org:2181 \\",
+        "                     --solrurl http://solr.example.org/solr/ \\",
+        "                     --configname collection \\",
+        "                     --collection collection \\",
+        "                     --noclean",
+        ""
+    };
+    for (String line : moreHelp) {
+      System.out.println(line);
+    }
   }
 
   private static Options createOptions() {
     Options options = new Options();
-    Option confpath = Option.builder()
-        .longOpt("path")
+    Option confdir = Option.builder()
+        .longOpt("confdir")
         .hasArg()
         .argName("PATH")
-        .desc("Path to local configuration directory [default is .]")
+        .desc("Path to local directory [default is .]")
         .build();
-    options.addOption(confpath);
+    options.addOption(confdir);
 
     Option confname = Option.builder()
         .longOpt("confname")
         .hasArg()
         .argName("NAME")
-        .desc("Name of the SolrCloud configset [default random string]")
+        .desc("name of config uploaded [default random]")
         .build();
     options.addOption(confname);
 
@@ -164,7 +197,7 @@ public class CLI {
         .longOpt("collection")
         .hasArg()
         .argName("NAME")
-        .desc("Name of the SolrCloud collection [default random string]")
+        .desc("name of collection [default random]")
         .build();
     options.addOption(collection);
     
@@ -172,7 +205,7 @@ public class CLI {
         .longOpt("solrurl")
         .hasArg()
         .argName("URL")
-        .desc("specific URL for Solr [default discovers from ZooKeeper]")
+        .desc("Use specific Solr URL [default ZooKeeper]")
         .build();
     options.addOption(solrurl);
 
@@ -197,7 +230,7 @@ public class CLI {
         .longOpt("zkroot")
         .hasArg()
         .argName("PATH")
-        .desc("Zookeeper chroot [no default]")
+        .desc("Zookeeper chroot [default empty]")
         .build();
     options.addOption(chroot);
     
@@ -209,9 +242,15 @@ public class CLI {
         .build();
     options.addOption(xmlout);
     
+    Option reload = Option.builder()
+        .longOpt("reload")
+        .desc("Reload named collection, e.g. deploy")
+        .build();
+    options.addOption(reload);
+    
     Option noclean = Option.builder()
     	.longOpt("noclean")
-    	.desc("Do not clean-up test artifacts in SolrCloud")
+    	.desc("Do not clean-up SolrCloud")
     	.build();
     options.addOption(noclean);
     

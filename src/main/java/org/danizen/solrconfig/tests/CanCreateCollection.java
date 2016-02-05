@@ -1,6 +1,5 @@
 package org.danizen.solrconfig.tests;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 
@@ -16,14 +15,11 @@ import org.junit.Test;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.request.CollectionAdminRequest.Create;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
-import org.apache.solr.common.cloud.ZkConfigManager;
 import org.apache.solr.common.util.NamedList;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import org.danizen.solrconfig.SolrConfig;
-import org.danizen.solrconfig.CleanUpTask;
 import org.danizen.solrconfig.TestMethod;
 
 public class CanCreateCollection {
@@ -36,6 +32,7 @@ public class CanCreateCollection {
     assumeTrue(Files.exists(config.getSolrConfigPath()));
     assumeTrue(Files.exists(config.getSchemaPath()));
     assumeThat(config.getTestMethod(), is(equalTo(TestMethod.CLOUD)));
+    assumeFalse(config.getReloadCollection());
   }
 
   public String newCollectionName(SolrClient client) throws IOException, SolrServerException  {
@@ -70,13 +67,12 @@ public class CanCreateCollection {
         config.setCollectionName(collectionName);
     }
     
+    CollectionAdminResponse response = new CollectionAdminResponse();
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
     request.setConfigName(config.getConfigName());
     request.setCollectionName(collectionName);
     request.setNumShards(1);
-    request.setReplicationFactor(1);
-    
-    CollectionAdminResponse response = new CollectionAdminResponse();
+    request.setReplicationFactor(1);      
     response.setResponse(client.request(request));
     assertTrue(response.isSuccess());
   }

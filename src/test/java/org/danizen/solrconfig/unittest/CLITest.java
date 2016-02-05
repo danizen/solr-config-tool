@@ -15,7 +15,7 @@ public class CLITest {
   @Test
   public void testCloudOptions() throws ParseException {
     String[] args = { 
-        "-path", "whatever", 
+        "-confdir", "whatever", 
         "-xmlout", "noob.xml",
         "-zkhost", "65.6.22.127:8983; 65.6.22.128:8983",
         "-zkroot", "/solr1"
