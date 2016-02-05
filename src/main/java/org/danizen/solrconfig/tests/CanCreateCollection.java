@@ -76,6 +76,7 @@ public class CanCreateCollection {
     
     CollectionAdminResponse response = new CollectionAdminResponse();
     response.setResponse(client.request(request));
+    CleanUpTask.addRemoveCollection();
     assertTrue(response.isSuccess());
   }
 }

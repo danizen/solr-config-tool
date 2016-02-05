@@ -50,6 +50,7 @@ public class SolrConfig {
   private Path xmloutpath = null;
   private String configName = null;
   private String collectionName = null;
+  private boolean cleanup = true; 
   
   private SolrClient client = null;
   private SolrZkClient zkClient = null;
@@ -199,5 +200,14 @@ public class SolrConfig {
 
   public void setCollectionName(String collectionName) {
     this.collectionName = collectionName;
-  }  
+  }
+
+  public boolean getCleanUp() {
+	return cleanup;
+  }
+	
+  public void setCleanUp(boolean cleanup) {
+	this.cleanup = cleanup;
+  }
+
 }

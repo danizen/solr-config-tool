@@ -113,6 +113,10 @@ public class CLI {
       config.setZkRoot(cmd.getOptionValue("zkroot"));     
     }
     
+    if (cmd.hasOption("noclean")) {
+      config.setCleanUp(false);
+    }
+    
     if (config.getTestMethod() == TestMethod.CLOUD && config.getZkHost() == null) {
       System.err.println("When using cloud verification, zkhost is required");
       System.err.println();
@@ -174,6 +178,12 @@ public class CLI {
         .desc("Generate JUnit style output XML to PATH")
         .build();
     options.addOption(xmlout);
+    
+    Option noclean = Option.builder()
+    	.longOpt("noclean")
+    	.desc("Do not clean-up test artifacts in SolrCloud")
+    	.build();
+    options.addOption(noclean);
     
     Option help = Option.builder()
         .longOpt("help")
