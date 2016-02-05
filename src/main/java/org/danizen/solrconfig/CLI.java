@@ -63,7 +63,12 @@ public class CLI {
     //   
     // TODO:
     //  - Allow user to add tests classes through some sort of test discovery
-    //  - Again try to make the test discovery rely on JunitCore. 
+    //  - Again try to make the test discovery rely on JunitCore.
+    //
+    // TODO:
+    //  - Generate XML reports 
+    //     + groupId "org.apache.maven.surefire" has many artifacts includes RunListener.
+    //     + groupId "org.apache.ant" has artifact "ant-junit" and "ant-junit4" whose JUnitTask ought to do nicely.
     //
     Result result = core.run(
         ConfigDirExists.class,
