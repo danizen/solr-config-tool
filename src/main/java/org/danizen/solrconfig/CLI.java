@@ -1,6 +1,5 @@
 package org.danizen.solrconfig;
 
-import java.nio.file.Paths;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
@@ -8,23 +7,25 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 
-import org.danizen.solrconfig.tests.*;
+import static org.danizen.solrconfig.SolrConfigOption.*;
+
+import java.nio.file.Path;
+
+import static org.danizen.solrconfig.CLIOption.*;
 
 
 public class CLI {
   
-  private SolrConfig config;
   private Options options = createOptions();
+  private TestController controller;
   
-  public CLI() {
-    this.config = SolrConfig.getInstance();
+  public CLI() throws Exception {
+    controller = new TestController();
   }
   
-  public static void main(String[] args) {
-    CLI cli = new CLI();   
+  public static void main(String[] args) throws Exception {
+    CLI cli = new CLI();
     
     CommandLine cmd = null;
     try {
@@ -36,9 +37,6 @@ public class CLI {
       System.exit(1);
     }
     
-    // load defaults - never done in unit tests of option parser
-    cli.config.loadDefaults();
-    
     if (!cli.validateOptions(cmd)) {
       cli.printHelp();
       System.exit(2);
@@ -49,96 +47,56 @@ public class CLI {
     System.exit(0);
   }
   
-  private boolean executeTest() {
-    JUnitCore core = new JUnitCore();
-    core.addListener(new ConsoleOutput());
-    
-    // TODO:
-    //  - Can use org.apache.solr.util.SimplePostTool to make it work,
-    //  - Benefit is that in guesses the document type...
-    //  - Constraints us to use SolrCloud rather than EmbeddedSolrServer
-    //  - Adds easier support for multiple file tests 
-    //  - How to add indexing pipeline and stuff is less clear - asked online
-    //  - Maybe sub-class SimplePostTool and add that in a protected method
-    //   
-    // TODO:
-    //  - Allow user to add tests classes through some sort of test discovery
-    //  - Again try to make the test discovery rely on JunitCore.
-    //
-    // TODO:
-    //  - Generate XML reports 
-    //     + groupId "org.apache.maven.surefire" has many artifacts includes RunListener.
-    //     + groupId "org.apache.ant" has artifact "ant-junit" and "ant-junit4" whose JUnitTask ought to do nicely.
-    //
-    Result result = core.run(
-        ConfigDirExists.class,
-        SchemaExists.class,
-        SolrConfigExists.class,
-        XmlFilesAreValid.class,
-        // Tests tests assume SolrCloud
-        CanUpConfig.class,
-        CanCreateCollection.class,
-        CanReloadCollection.class
-    );
-    if (config.getCleanUp()) {
-      CleanUpTask.removeCollection();
-      CleanUpTask.removeConfigSet();
-    }
-    return result.wasSuccessful();
+  private boolean executeTest() throws Exception {
+    controller.execute();
+    return true;
+  }
+  
+  public void setPropertyOption(CommandLine cmd, SolrConfigOption opt) {
+    if (cmd.hasOption(opt.getName())) {
+      System.setProperty(opt.getPropertyName(), cmd.getOptionValue(opt.getName()));
+    }    
+  }
+  
+  public Path getXmlDir() {
+    return controller.getOutputDir();
   }
 
   public boolean validateOptions(CommandLine cmd) {
 
-
-    if (cmd.hasOption("help")) {
+    if (cmd.hasOption(HELP.getName())) {
       this.printHelp();
       System.exit(0);
       // NEVER REACHED
       return false;
     }
+    
+    if (cmd.hasOption(XMLDIR.getName())) {
+      controller.setXmlEnabled(true);
+      controller.setOutputDir(cmd.getOptionValue(XMLDIR.getName()));
+    }
+    
+    if (cmd.hasOption(NOCLEAN.getName())) {
+      System.setProperty(CLEANUP.getPropertyName(), "false");
+    }
 
-    if (cmd.hasOption("confdir")) {
-      config.setPath(cmd.getOptionValue("confdir"));
-    }
+    setPropertyOption(cmd, CONFDIR);
+    setPropertyOption(cmd, CONFNAME);
+    setPropertyOption(cmd, COLLECTION);
+    setPropertyOption(cmd, SOLRURL);
+    setPropertyOption(cmd, ZKHOST);
+    setPropertyOption(cmd, ZKROOT);
+    setPropertyOption(cmd, RELOAD);
     
-    if (cmd.hasOption("confname")) {
-      config.setConfigName(cmd.getOptionValue("confname"));
-    }
-    
-    if (cmd.hasOption("collection")) {
-      config.setCollectionName(cmd.getOptionValue("collection"));
-    }
-    
-    if (cmd.hasOption("solrurl")) {      
-      config.setSolrURL(cmd.getOptionValue("solrurl"));
-    }
-    
-    if (cmd.hasOption("xmlout")) {
-      config.setXmlOutPath(Paths.get(cmd.getOptionValue("xmlout")));          
-    }
-    
-    if (cmd.hasOption("zkhost")) {
-      config.setZkHost(cmd.getOptionValue("zkhost"));
-    }
-    
-    if (cmd.hasOption("zkroot")) {
-      config.setZkRoot(cmd.getOptionValue("zkroot"));     
-    }
-    
-    if (cmd.hasOption("noclean")) {
-      config.setCleanUp(false);
-    }
-    
-    if (cmd.hasOption("reload")) {
-      if (!cmd.hasOption("collection")) {
+    if (cmd.hasOption(RELOAD.getName())) {
+      if (!cmd.hasOption(COLLECTION.getName())) {
         System.err.println("When only reloading the collection, --collection is required");
         System.err.println();
         return false;
       }
-      config.setReloadCollection(true);
     }
     
-    if (config.getTestMethod() == TestMethod.CLOUD && config.getZkHost() == null) {
+    if (!cmd.hasOption(ZKHOST.getName())) {
       System.err.println("--zkhost is required unless provided by $HOME/.solrconfigtest");
       System.err.println();
       return false;
@@ -183,7 +141,7 @@ public class CLI {
   private static Options createOptions() {
     Options options = new Options();
     Option confdir = Option.builder()
-        .longOpt("confdir")
+        .longOpt(CONFDIR.getName())
         .hasArg()
         .argName("PATH")
         .desc("Path to local directory [default is .]")
@@ -191,7 +149,7 @@ public class CLI {
     options.addOption(confdir);
 
     Option confname = Option.builder()
-        .longOpt("confname")
+        .longOpt(CONFNAME.getName())
         .hasArg()
         .argName("NAME")
         .desc("name of config uploaded [default random]")
@@ -199,7 +157,7 @@ public class CLI {
     options.addOption(confname);
 
     Option collection = Option.builder()
-        .longOpt("collection")
+        .longOpt(COLLECTION.getName())
         .hasArg()
         .argName("NAME")
         .desc("name of collection [default random]")
@@ -207,24 +165,15 @@ public class CLI {
     options.addOption(collection);
     
     Option solrurl = Option.builder()
-        .longOpt("solrurl")
+        .longOpt(SOLRURL.getName())
         .hasArg()
         .argName("URL")
         .desc("Use specific Solr URL [default ZooKeeper]")
         .build();
     options.addOption(solrurl);
 
-    // EmbeddedSolrServer not supported 
-    //Option cloud = Option.builder()
-    //    .longOpt("use")
-    //    .hasArg()
-    //    .argName("cloud|embedded")
-    //    .desc("how to test [default EmbeddedSolrServer]")
-    //    .build();
-    //options.addOption(cloud);
-    
     Option zkhost = Option.builder()
-        .longOpt("zkhost")
+        .longOpt(ZKHOST.getName())
         .hasArg()
         .argName("IPADDR:PORT...")
         .desc("Zookeeper host:port list [no default]")
@@ -232,38 +181,39 @@ public class CLI {
     options.addOption(zkhost);
     
     Option chroot = Option.builder()
-        .longOpt("zkroot")
+        .longOpt(ZKROOT.getName())
         .hasArg()
         .argName("PATH")
         .desc("Zookeeper chroot [default empty]")
         .build();
     options.addOption(chroot);
     
-    Option xmlout = Option.builder()
-        .longOpt("xmlout")
-        .hasArg()
-        .argName("PATH")
-        .desc("Generate JUnit style output XML to PATH")
-        .build();
-    options.addOption(xmlout);
-    
     Option reload = Option.builder()
-        .longOpt("reload")
+        .longOpt(RELOAD.getName())
         .desc("Reload named collection, e.g. deploy")
         .build();
     options.addOption(reload);
-    
+
     Option noclean = Option.builder()
-    	.longOpt("noclean")
-    	.desc("Do not clean-up SolrCloud")
-    	.build();
-    options.addOption(noclean);
+        .longOpt(NOCLEAN.getName())
+        .desc("Do not clean-up SolrCloud")
+        .build();
+      options.addOption(noclean);
+      
+    Option outdir = Option.builder()
+        .longOpt(XMLDIR.getName())
+        .desc("Store results to directory")
+        .hasArg()
+        .argName("PATH")
+        .build();
+    options.addOption(outdir);
     
     Option help = Option.builder()
-        .longOpt("help")
+        .longOpt(HELP.getName())
         .desc("Display this message")
         .build();
     options.addOption(help);
+    
     return options;
   }
 

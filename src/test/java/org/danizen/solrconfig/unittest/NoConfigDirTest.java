@@ -15,7 +15,6 @@ public class NoConfigDirTest {
   
   @BeforeClass
   public static void setUp() {
-    SolrConfig.newInstance();
     SolrConfig config = SolrConfig.getInstance();
         
     config.setPath("/nosuchdirectory");

@@ -4,7 +4,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -13,17 +12,12 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.cloud.OnReconnect;
 import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.common.util.NamedList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.danizen.solrconfig.SolrConfigOption.*;
+
 public class SolrConfig {
-  
-  private static final Logger logger = LoggerFactory.getLogger(SolrConfig.class);
   
   // constructor is private so no one else can create it
   private SolrConfig() {
@@ -37,38 +31,19 @@ public class SolrConfig {
     return instance;
   }
   
-  // mostly for testing in a single JVM
-  public static void newInstance() {
-    instance = new SolrConfig();
-  }
-  
-  // the attributes are more like a struct than a POJO
-  private TestMethod method = TestMethod.CLOUD;
-  private boolean reloadCollection = false;
-  private Path path = Paths.get(".");
-  private String zkhost = null;
-  private String zkroot = null;
-  private Path xmloutpath = null;
-  private String configName = null;
-  private String collectionName = null;
-  private boolean cleanup = true; 
-  private String solrurl = null;
+  // Is this too subtle? - it should be as clear as "Autowired" Spring notation, right...?
+  private Path path = Paths.get(System.getProperty(CONFDIR.getPropertyName(), "."));
+  private String zkhost = System.getProperty(ZKHOST.getPropertyName(), "127.0.0.1:9983");
+  private String zkroot = System.getProperty(ZKROOT.getPropertyName(), null);
+  private String configName = System.getProperty(CONFNAME.getPropertyName(), null);
+  private String collectionName = System.getProperty(COLLECTION.getPropertyName(), null);
+  private Boolean cleanup = Boolean.valueOf(System.getProperty(CLEANUP.getPropertyName(), "true"));
+  private Boolean reloadCollection = Boolean.valueOf(System.getProperty(RELOAD.getPropertyName(), "false"));
+  private String solrurl = System.getProperty(SOLRURL.getPropertyName(), null);
   
   private SolrClient client = null;
   private SolrZkClient zkClient = null;
   
-  public TestMethod getTestMethod() {
-    return method;
-  }
-
-  public void setTestMethod(TestMethod method) {
-    this.method = method;
-  }
-  
-  public void setTestMethod(String method) {
-    this.method = TestMethod.valueOf(method.toUpperCase());
-  }
-
   public Path getPath() {
     return path;
   }
@@ -95,14 +70,6 @@ public class SolrConfig {
 
   public void setZkRoot(String zkroot) {
     this.zkroot = zkroot;
-  }
-
-  public Path getXmlOutPath() {
-    return xmloutpath;
-  }
-
-  public void setXmlOutPath(Path xmloutpath) {
-    this.xmloutpath = xmloutpath;
   }
 
   public Path getSolrConfigPath() {
@@ -144,36 +111,7 @@ public class SolrConfig {
     );
     return zkClient;
   }
-
-  // but it does know how to load defaults from an properties file
-  public void loadDefaults(InputStream defaults) throws IOException {
-    Properties p = new Properties();
-    p.load(defaults);
-    String v = null;
-    // TODO: no support as yet for EmbeddedSolrServer
-    //if ((v = p.getProperty("method")) != null)
-    //   this.method = TestMethod.valueOf(v.toUpperCase());
-    if ((v = p.getProperty("zkhost")) != null)
-      this.zkhost = v;
-    if ((v = p.getProperty("zkroot")) != null)
-      this.zkroot = v;
-    if ((v = p.getProperty("solrurl")) != null)
-      this.solrurl = v;
-  }
-  
-  // and it knows a canonical path to that
-  public void loadDefaults() {
-    Path userhome = Paths.get(System.getProperty("user.home"));
-    Path defaultConfigFile = userhome.resolve(".solrconfigtest");    
-    if (Files.exists(defaultConfigFile)) {
-      try {
-        this.loadDefaults(Files.newInputStream(defaultConfigFile));
-      } catch (IOException e) {
-        logger.error("invalid format or I/O error reading "+defaultConfigFile);
-      }
-    }
-  }
-  
+   
   private void formatResponseGuts(StringBuffer buf, NamedList<Object> list, int indent) {
     String spaces = StringUtils.repeat(" ",  indent);
     for (int i = 0; i < list.size(); i++) {
@@ -210,12 +148,12 @@ public class SolrConfig {
     this.collectionName = collectionName;
   }
 
-  public boolean getCleanUp() {
-	return cleanup;
+  public boolean isCleanupEnabled() {
+    return cleanup;
   }
 	
-  public void setCleanUp(boolean cleanup) {
-	this.cleanup = cleanup;
+  public void setCleanupEnabled(boolean cleanup) {
+    this.cleanup = cleanup;
   }
 
   public String getSolrURL() {

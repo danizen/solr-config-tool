@@ -16,7 +16,6 @@ public class MissingConfigTest {
   
   @BeforeClass
   public static void setUp() {
-    SolrConfig.newInstance();
     SolrConfig config = SolrConfig.getInstance();
     String configPath = ResourceUtils.getResourceSubdir("/missingconfig");
     config.setPath(configPath);

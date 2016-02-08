@@ -18,8 +18,6 @@ import org.apache.solr.common.cloud.ZkStateReader;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import org.danizen.solrconfig.SolrConfig;
-import org.danizen.solrconfig.CleanUpTask;
-import org.danizen.solrconfig.TestMethod;
 
 public class CanUpConfig {
   
@@ -30,7 +28,6 @@ public class CanUpConfig {
     assumeTrue(Files.exists(config.getPath()));
     assumeTrue(Files.exists(config.getSolrConfigPath()));
     assumeTrue(Files.exists(config.getSchemaPath()));
-    assumeThat(config.getTestMethod(), is(equalTo(TestMethod.CLOUD)));
   }
 
   public String newConfigName(ZkConfigManager configManager) throws IOException {

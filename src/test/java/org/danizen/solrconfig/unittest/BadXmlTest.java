@@ -17,7 +17,6 @@ public class BadXmlTest {
   
   @BeforeClass
   public static void setUp() {
-    SolrConfig.newInstance();
     SolrConfig config = SolrConfig.getInstance();
     String configPath = ResourceUtils.getResourceSubdir("/badxml");
     config.setPath(configPath);

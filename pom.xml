@@ -13,6 +13,7 @@
   	<solr.version>5.4.0</solr.version>
   	<junit.version>4.12</junit.version>
   	<slf4j.version>1.7.7</slf4j.version>
+  	<ant.api.version>1.9.6</ant.api.version>
   </properties>
   <dependencies>
   	<dependency>
@@ -50,9 +51,28 @@
   		<artifactId>slf4j-log4j12</artifactId>
   		<version>${slf4j.version}</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.apache.ant</groupId>
+  		<artifactId>ant-junit</artifactId>
+  		<version>${ant.api.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.ant</groupId>
+  		<artifactId>ant-junit4</artifactId>
+  		<version>${ant.api.version}</version>
+  	</dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+      	<artifactId>maven-surefire-plugin</artifactId>
+      	<version>2.19.1</version>
+      	<configuration>
+      	  <forkCount>1</forkCount>
+      	  <reuseForks>false</reuseForks>
+      	</configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>

@@ -18,7 +18,6 @@ import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 
 import org.danizen.solrconfig.SolrConfig;
-import org.danizen.solrconfig.TestMethod;
 
 public class CanReloadCollection {
   private SolrConfig config = SolrConfig.getInstance();
@@ -28,7 +27,6 @@ public class CanReloadCollection {
     assumeTrue(Files.exists(config.getPath()));
     assumeTrue(Files.exists(config.getSolrConfigPath()));
     assumeTrue(Files.exists(config.getSchemaPath()));
-    assumeThat(config.getTestMethod(), is(equalTo(TestMethod.CLOUD)));
     assumeTrue(config.getReloadCollection());
   }
  

@@ -20,7 +20,6 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import org.danizen.solrconfig.SolrConfig;
-import org.danizen.solrconfig.TestMethod;
 
 public class CanCreateCollection {
 
@@ -31,7 +30,6 @@ public class CanCreateCollection {
     assumeTrue(Files.exists(config.getPath()));
     assumeTrue(Files.exists(config.getSolrConfigPath()));
     assumeTrue(Files.exists(config.getSchemaPath()));
-    assumeThat(config.getTestMethod(), is(equalTo(TestMethod.CLOUD)));
     assumeFalse(config.getReloadCollection());
   }
 
