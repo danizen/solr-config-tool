@@ -8,8 +8,7 @@ package org.danizen.solrconfig;
  */
 public enum CLIOption {
   XMLDIR,
-  NOCLEAN,
-  HELP;
+  NOCLEAN;
   
   public String getName() {
     return this.name().toLowerCase();

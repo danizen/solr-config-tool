@@ -17,6 +17,10 @@ public enum SolrConfigOption {
   CLEANUP,
   BASICAUTH;
   
+  public String toString() {
+    return this.getName();
+  }
+  
   public String getName() {
     return this.name().toLowerCase();
   }

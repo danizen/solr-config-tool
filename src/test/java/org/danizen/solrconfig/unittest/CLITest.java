@@ -12,17 +12,18 @@ public class CLITest {
   
   @Test
   public void testCloudOptions() throws Exception {
-    String[] args = { 
+    String[] args = {
+        "test",
         "-confdir", "whatever", 
         "-xmldir", "test_output",
         "-zkhost", "65.6.22.127:8983; 65.6.22.128:8983",
         "-zkroot", "/solr1",
         "-solrurl", "http://127.0.0.1:8983/",
         "-confname", "mybigconfig",
-        "-collection", "gettingstarted2"
+        "-collection", "gettingstarted2",
     };
     CLI cli = new CLI();
-    boolean isvalid = cli.validateOptions(cli.parseOptions(args));
+    boolean isvalid = cli.processOptions(args);
     assertTrue("validates command-line options", isvalid);
     
     assertEquals(cli.getXmlDir(), Paths.get("test_output"));
@@ -34,13 +35,14 @@ public class CLITest {
     assertEquals("mybigconfig", config.getConfigName());
     assertEquals("gettingstarted2", config.getCollectionName());
     assertEquals("http://127.0.0.1:8983/", config.getSolrURL());
+    assertEquals(true, config.isCleanupEnabled());
   }
   
   @Test
   public void testZkHostRequired() throws Exception {
     String[] args = {};
     CLI cli = new CLI();
-    boolean isvalid = cli.validateOptions(cli.parseOptions(args));
+    boolean isvalid = cli.processOptions(args);
     assertFalse("requires something more", isvalid);
   }
   
