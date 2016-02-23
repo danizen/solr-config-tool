@@ -32,13 +32,8 @@ public class TestController {
       SchemaExists.class,
       SolrConfigExists.class,
       XmlFilesAreValid.class,
-      // These tests interact with SolrCloud
+      // This test interacts with SolrCloud
       CanUpConfig.class,
-      CanCreateCollection.class,
-      CanReloadCollection.class,
-      // TODO: write test - CanIndexData.class,
-      // TODO: write test - CanQueryData.class,
-      CleanUp.class,
   };
   
   public TestController() throws Exception {
@@ -47,10 +42,15 @@ public class TestController {
     task.setFork(false);
     task.setShowOutput(true);
     task.setOutputToFormatters(true);
-    //task.setForkMode(new JUnitTask.ForkMode(JUnitTask.ForkMode.ONCE));
-    //task.setCloneVm(true);
   }
-   
+  
+  public void addTestCase(Class<?> clz) {
+    JUnitTest test = new JUnitTest(clz.getName());
+    if (outputDir != null)
+      test.setTodir(outputDir.toFile());
+    task.addTest(test);    
+  }
+    
   public void execute() throws Exception {
 
     // configure XML output
@@ -61,13 +61,18 @@ public class TestController {
     }
 
     // Add tests to task
+    SolrConfig config = SolrConfig.getInstance();
+    
     for (int i = 0; i < testclasses.length; i++) {
-      Class<?> clz = testclasses[i];
-      JUnitTest test = new JUnitTest(clz.getName());
-      if (outputDir != null)
-        test.setTodir(outputDir.toFile());
-      task.addTest(test);
+      addTestCase(testclasses[i]);
     }
+       
+    if (config.getReloadCollection())
+      addTestCase(CanReloadCollection.class);
+    else
+      addTestCase(CanCreateCollection.class);     
+    if (config.isCleanupEnabled())
+      addTestCase(CleanUp.class);
 
     // Create output directory if needed
     if (outputDir != null && Files.notExists(outputDir)) {
