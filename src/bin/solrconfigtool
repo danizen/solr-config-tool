@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Invokes solr-config-tool java program
+#
+echo "Not yet implemented" 1>&2
+exit 1

@@ -4,3 +4,4 @@ target/
 cscope.*
 .classpath
 .project
+pom.xml.versionsBackup

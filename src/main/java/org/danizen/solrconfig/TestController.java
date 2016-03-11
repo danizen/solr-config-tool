@@ -42,6 +42,9 @@ public class TestController {
     task.setFork(false);
     task.setShowOutput(true);
     task.setOutputToFormatters(true);
+    JUnitTask.SummaryAttribute printSummary = new JUnitTask.SummaryAttribute();
+    printSummary.setValue("true");
+    task.setPrintsummary(printSummary);
   }
   
   public void addTestCase(Class<?> clz) {
