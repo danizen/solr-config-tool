@@ -1,5 +1,8 @@
 .settings/
 dependency-reduced-pom.xml
+zoo_data/
+solr-*.zip
+solr-*/
 target/
 cscope.*
 .classpath
