@@ -12,6 +12,7 @@
 				<include>solrconfigtool.bat</include>
 			</includes>
 			<lineEnding>dos</lineEnding>
+			<filtered>true</filtered>
 		</fileSet>
 		<fileSet>
 			<directory>src/bin</directory>
@@ -21,6 +22,7 @@
 			</includes>
 			<lineEnding>unix</lineEnding>
 			<fileMode>0755</fileMode>
+			<filtered>true</filtered>
 		</fileSet>
 		<fileSet>
 			<directory>target</directory>
