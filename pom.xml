@@ -1,15 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.danizen.solr</groupId>
-  <artifactId>solr-config-test</artifactId>
+  <artifactId>solr-config-tool</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>solr-config-test</name>
+  <name>solr-config-tool</name>
   <description>A command-line utility that tests a Solr configuration directory</description>
   <properties>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   	<jdk.version>1.7</jdk.version>
   	<cli.version>1.3.1</cli.version>
+    <lang.version>3.4</lang.version>
   	<solr.version>5.4.0</solr.version>
+  	<junit.version>4.12</junit.version>
+  	<slf4j.version>1.7.7</slf4j.version>
+  	<ant.api.version>1.9.6</ant.api.version>
   </properties>
   <dependencies>
   	<dependency>
@@ -18,13 +22,57 @@
   		<version>${cli.version}</version>
   	</dependency>
   	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-lang3</artifactId>
+  		<version>${lang.version}</version>
+  	</dependency>
+  	<dependency>
   		<groupId>org.apache.solr</groupId>
   		<artifactId>solr-solrj</artifactId>
   		<version>${solr.version}</version>
   	</dependency>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>${junit.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>jcl-over-slf4j</artifactId>
+  		<version>${slf4j.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-api</artifactId>
+  		<version>${slf4j.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.slf4j</groupId>
+  		<artifactId>slf4j-log4j12</artifactId>
+  		<version>${slf4j.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.ant</groupId>
+  		<artifactId>ant-junit</artifactId>
+  		<version>${ant.api.version}</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.ant</groupId>
+  		<artifactId>ant-junit4</artifactId>
+  		<version>${ant.api.version}</version>
+  	</dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+      	<artifactId>maven-surefire-plugin</artifactId>
+      	<version>2.19.1</version>
+      	<configuration>
+      	  <forkCount>1</forkCount>
+      	  <reuseForks>false</reuseForks>
+      	</configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -44,6 +92,22 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+      	<artifactId>maven-assembly-plugin</artifactId>
+      	<configuration>
+      		<descriptor>src/assembly/bin.xml</descriptor>
+      		<finalName>solr-config-tool-${pom.version}</finalName>
+      	</configuration>
+      	<executions>
+      		<execution>
+      			<phase>package</phase>
+      			<goals>
+      				<goal>single</goal>
+      			</goals>
+      		</execution>
+      	</executions>
       </plugin>
     </plugins>
   </build>

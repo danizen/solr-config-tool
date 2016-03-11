@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<foo>
+	<message>This file contains bad XML</message>
+	<message>The bad XML is not on this line</message>
+	<message>Here a tag is incorrectly terminated<message>
+</foo>

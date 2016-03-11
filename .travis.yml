@@ -1,0 +1,5 @@
+language: java
+install: ./ci/download.sh
+before_script: ./ci/setup.sh
+after_script: ./ci/teardown.sh
+
