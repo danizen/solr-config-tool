@@ -1,5 +1,7 @@
 # Solr Config Tool
 
+[![Build Status](https://travis-ci.org/danizen/solr-config-tool.svg?branch=master)](https://travis-ci.org/danizen/solr-config-tool.svg?branch=master)
+
 ## Description
 
 This project allows an Apache Solr Configuration directory to be tested and deployed against an existing SolrCloud easily, either from the command-line or from a CI server.  It is possible to do this with the Solr and zkCli command line scripts.  However, Continuous Integration (CI) jobs based on these scripts do not produce easily viewable test results in de-facto standard Junit XML format.  This tool does.
