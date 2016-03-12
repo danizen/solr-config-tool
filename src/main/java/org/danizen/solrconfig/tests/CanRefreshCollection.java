@@ -21,7 +21,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import org.danizen.solrconfig.SolrConfig;
 
-public class CanCreateCollection {
+public class CanRefreshCollection {
 
   private SolrConfig config = SolrConfig.getInstance();
 
@@ -56,22 +56,50 @@ public class CanCreateCollection {
     return newName;
   }
   
+  public boolean collectionNameExists(SolrClient client, String collectionName) 
+      throws IOException, SolrServerException  
+  {
+    NamedList<Object> response = client.request(new CollectionAdminRequest.List());
+    System.out.println(config.formatResponse(response));
+    NamedList<Object> header = (NamedList<Object>) response.get("responseHeader");
+    assertThat((Integer)header.get("status"), is(equalTo(0)));
+    List<String> collections = (List<String>) response.get("collections");
+    
+    for (String existingCollectionName : collections) {
+      if (collectionName.equals(existingCollectionName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  
   @Test
   public void test() throws IOException, SolrServerException {
+    boolean reload = false;
     SolrClient client = config.getSolrClient();
     String collectionName = config.getCollectionName();
     if (collectionName == null) {
-        collectionName = newCollectionName(client);
-        config.setCollectionName(collectionName);
+      collectionName = newCollectionName(client);
+      config.setCollectionName(collectionName);
+    } else { 
+      reload = collectionNameExists(client, collectionName);
     }
     
     CollectionAdminResponse response = new CollectionAdminResponse();
-    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setConfigName(config.getConfigName());
-    request.setCollectionName(collectionName);
-    request.setNumShards(1);
-    request.setReplicationFactor(1);      
-    response.setResponse(client.request(request));
+    
+    if (reload) { 
+      CollectionAdminRequest.Reload request = new CollectionAdminRequest.Reload();
+      request.setCollectionName(collectionName);
+      response.setResponse(client.request(request));
+    } else {
+      CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+      request.setConfigName(config.getConfigName());
+      request.setCollectionName(collectionName);
+      request.setNumShards(1);
+      request.setReplicationFactor(1);      
+      response.setResponse(client.request(request));
+    }
     assertTrue(response.isSuccess());
   }
 }

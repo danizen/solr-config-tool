@@ -9,8 +9,7 @@ import org.apache.tools.ant.taskdefs.optional.junit.FormatterElement;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTask;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTask.ForkMode;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
-import org.danizen.solrconfig.tests.CanCreateCollection;
-import org.danizen.solrconfig.tests.CanReloadCollection;
+import org.danizen.solrconfig.tests.CanRefreshCollection;
 import org.danizen.solrconfig.tests.CanUpConfig;
 import org.danizen.solrconfig.tests.CleanUp;
 import org.danizen.solrconfig.tests.ConfigDirExists;
@@ -32,6 +31,7 @@ public class TestController {
       SchemaExists.class,
       SolrConfigExists.class,
       XmlFilesAreValid.class,
+      CanRefreshCollection.class,
       // This test interacts with SolrCloud
       CanUpConfig.class,
   };
@@ -70,10 +70,6 @@ public class TestController {
       addTestCase(testclasses[i]);
     }
        
-    if (config.getReloadCollection())
-      addTestCase(CanReloadCollection.class);
-    else
-      addTestCase(CanCreateCollection.class);     
     if (config.isCleanupEnabled())
       addTestCase(CleanUp.class);
 
